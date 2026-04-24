@@ -1,33 +1,42 @@
 module LoopOSAgentManagement
 
-export startagent, stopagent
+export createagent, startagent, stopagent, rmagent
 
-# using Pkg
-# import Main.Revise
-# import Main.State
+using LoopOSLearning: newpkg
 
-const LOOPOSPKG = "https://github.com/1m1-github/LoopOS.git"
-const PROCESS = Dict{String,Base.Process}
+const PROCESS = Dict{String,Base.Process}()
 
-function creatagent(name, pkgs, files)
-    # newpkg(name, pkgs, files)
-    # isdir(name) && error("$name already exists")
-    # Pkg.generate(name)
-    # cd(name) do
-    #     Pkg.activate(".")
-    #     run(`mkdir long`)
-    #     Pkg.add(LOOPOSPKG)
-    #     for pkg = pkgs Pkg.add(pkg) end
-    # end
-    # Pkg.activate(".")
+const FILE(name) = """
+module $name
+using LoopOSAgent
+using LoopOSLogging # DEBUG
+function (@main)(ARGS)
+    LoopOS.awaken(@__FILE__)
 end
+end
+"""
+file(name) = joinpath(LoopOSLearning.JULIACODEPATH, name, "src", name * ".jl")
 
+function createagent(;name, pkgs)
+    newpkg(;
+        name = name,
+        pkgs = [
+            "LoopOS",
+            "LoopOSAgent",
+            pkgs...,
+            "LoopOSLogging", # DEBUG
+        ],
+    )    
+    write(file(name), FILE(name))
+    mkdir(name) && cd(name)
+    startagent(name)
+end
 function startagent(name)
-    PROCESS[name] = run(`julia --quiet --depwarn=error --threads auto main.jl $name`)
+    cd(name) do
+        PROCESS[name] = run(`julia --quiet --depwarn=error --threads auto $(file(name)) $name`)
+    end
 end
-
 stopagent(name) = kill(PROCESS[name])
-
 function rmagent(name)
     stopagent(name)
     run(`rm -rf $name`)
