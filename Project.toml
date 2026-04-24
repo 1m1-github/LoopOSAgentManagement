@@ -1,4 +1,10 @@
 name = "LoopOSAgentManagement"
 uuid = "1a7464de-1839-49ef-901c-5f240839f510"
-version = "3.0.0"
+version = "4.0.0"
 authors = ["1m1 <imi@1m1.io>"]
+
+[deps]
+LoopOSLearning = "5dc6656b-7891-47f1-89e8-5cb280c7ea48"
+
+[compat]
+LoopOSLearning = ">=7.0.0"
