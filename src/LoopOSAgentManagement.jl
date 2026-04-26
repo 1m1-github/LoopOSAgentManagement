@@ -10,18 +10,16 @@ const FILE(name) = """
 module $name
 using LoopOSAgent
 using LoopOSLogging # DEBUG
-function (@main)(ARGS)
-    LoopOS.awaken(@__FILE__)
-end
+LoopOSAgent.start($name)
 end
 """
 file(name) = joinpath(LoopOSLearning.JULIACODEPATH, name, "src", name * ".jl")
 
 function createagent(;name, pkgs)
-    newpkg(;
+    isdir(name) && return startagent(name)
+    newpkg(
         name = name,
         pkgs = [
-            "LoopOS",
             "LoopOSAgent",
             pkgs...,
             "LoopOSLogging", # DEBUG
